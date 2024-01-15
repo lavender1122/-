@@ -45,4 +45,20 @@ public class patientService {
 	}
 
 	
+	public void TU(List<Object> param, int select) {
+		patientdao.TU(param,select);
+	}
+
+	public Map<String, Object> TUL() {
+		return patientdao.TUL();
+	}
+	public void patientInsert(List<Object> param) {      
+		patientdao.patientInsert(param);
+	   }
+
+	public void PIL() {
+		patientdao.PIL();
+	}
+
+	
 }

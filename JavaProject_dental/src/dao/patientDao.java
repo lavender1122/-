@@ -53,6 +53,45 @@ public class patientDao {
 					"ORDER BY T.TR_NO DESC";
 			return jdbc.selectOne(sql);
 		}
+
+		public void TU(List<Object> param, int select) {
+			String sqlFront ="UPDATE TREATMENT\r\n" + 
+					"SET";
+			String format = " %s = ? ";
+			String sql = sqlFront;
+			if(select == 1 || select ==3) { //진료내용
+				sql+=String.format(format,"TR_REMARK");
+			}
+			if(select == 2 || select ==3) {//진료일
+				sql+=String.format(format,"TR_DATE");
+			}
+			sql += "WHERE \r\n" + 
+					" SUBSTR(TR_NO,2,4) IN (SELECT MAX(SUBSTR(TR_NO,2,4))\r\n" + 
+					" FROM TREATMENT)";
+			jdbc.update(sql,param);
+			
+		}
+
+		public Map<String, Object> TUL() {
+			String sql = "SELECT *\r\n" + 
+					" FROM TREATMENT\r\n" + 
+					" WHERE SUBSTR(TR_NO,2,6) IN (SELECT MAX(SUBSTR(TR_NO,2,6))\r\n" + 
+					" FROM TREATMENT)";
+			return jdbc.selectOne(sql);
+		}
+
+		public void patientInsert(List<Object> param) {
+			 String sql = "INSERT INTO PATIENT VALUES\r\n" + 
+			         "('P'||LPAD(PATIENT_SEQUENCE.nextVAL, 3,'0'), ? , ?, ?, \r\n" + 
+			         " ?, ?,? , '없음', '없음');";
+			   jdbc.update(sql, param);
+		}
+
+		public void PIL() {
+			String sql = "";
+			jdbc.selectOne(sql);
+			
+		}
 	
 
 }

@@ -1,7 +1,10 @@
 package controller;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -29,7 +32,6 @@ public class MainController extends Print {
 	private void start() {
 		//!!나중에 login으로 바꿔야함!!!
 		View view = View.LOGIN;
-//		View view = View.MAIN;
 		while (true) {
 			switch (view) {
 			case LOGIN:
@@ -235,10 +237,41 @@ public class MainController extends Print {
 
 	private View treatmentUpdate() {
 		System.out.println("진료수정");
-		//수정된 리스트  출력
+		//수정하기 진료내용,진료일, 둘다
+		System.out.println("1 진료내용");
+		System.out.println("2 진료일");
+		System.out.println("3 진료내용 진료일");
+		
+		int select = ScanUtil.nextInt("선택하시오");
+		List<Object>param = new ArrayList();
+		if(select == 1 || select ==3 ) {
+			String content = ScanUtil.nextLine("1.진료내용 변경");
+			param.add(content);
+		}
+		if(select == 2 || select ==3 ) {
+			String date = ScanUtil.nextLine("2.진료일 변경");
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			Date date2=null;
+			try {
+				date2=sdf.parse(date);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			param.add(date2);
+		}
+		patientservice.TU(param,select);
+		
 		System.out.println("수정된내용 출력");
+		 Map<String, Object>list = patientservice.TUL();
+			String no =(String)list.get("PT_NO");
+			String name =(String)list.get("PT_NAME");
+			String mark =(String)list.get("TR_REMARK");
+			String date =(String)list.get("TR_DATE");
+			System.out.println(no +"\t"+name +"\t"+mark+"\t"+date);
+		
+		//수정된 리스트  출력
 		System.out.println("1다시 진료수정   2등록된환자");
-		int sel = ScanUtil.menu();
+		int sel = ScanUtil.nextInt("선택");
 		switch (sel) {
 		case 1:
 			return View.TREATMENT_UPDATE;  
@@ -295,6 +328,7 @@ public class MainController extends Print {
 		//해당 환자 정보 출력
 	    Map<String, Object>ptlist = patientservice.ptoList(ptNo);
 	    printpatient_old(ptlist);
+	    
 		System.out.println("1환자수정,2진료,3결제4예약,5조회, 6홈");
 		int sel = ScanUtil.menu();
 		switch (sel) {
@@ -391,9 +425,32 @@ public class MainController extends Print {
 	}
 
 	private View patientInsert() {
-		System.out.println("환자등록");
-		
-		//짝궁님 코드
+		System.out.println("신규환자등록");
+	      
+	      String name = ScanUtil.nextLine("환자이름 : ");
+	      String gender = ScanUtil.nextLine("환자 성별 : ");
+	      String address = ScanUtil.nextLine("주소 : ");
+	      int rrn1 = ScanUtil.nextInt("주민등록번호 앞자리 : ");
+	      int rrn2 = ScanUtil.nextInt("주민등록번호 뒷자리 : ");
+	      String telno = ScanUtil.nextLine("전화번호 : ");
+	      String str = ScanUtil.nextLine("특이사항 : ");
+	      String disease = ScanUtil.nextLine("전신질환 : ");
+	      
+	      List <Object> param = new ArrayList();
+	      
+	      param.add(name);
+	      param.add(gender);
+	      param.add(address);
+	      param.add(rrn1);
+	      param.add(rrn2);
+	      param.add(telno);
+	      param.add(str);
+	      param.add(disease);
+	      
+	      patientservice.patientInsert(param);
+	      
+	      patientservice.PIL();
+	
 
 		return View.PATIENT_OLD;
 	}
