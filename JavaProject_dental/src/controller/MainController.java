@@ -1,7 +1,13 @@
 package controller;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+
+import javax.security.sasl.SaslClient;
 
 import dao.patientDao;
 import service.freeService;
@@ -9,17 +15,21 @@ import service.patientService;
 import util.Print;
 import util.ScanUtil;
 import util.View;
+import vo.freeVo;
+import vo.patientVo;
 
 public class MainController extends Print {
 	freeService freeservice =freeService.getInstance();
-	patientService patientDao =patientService.getInstance();
+	patientService patientservice =patientService.getInstance();
 	static public Map<String, Object> sessionStorage = new HashMap<>();
 	public static void main(String[] args) {
 		new MainController().start();
 	}
 	
 	private void start() {
+		//!!나중에 login으로 바꿔야함!!!
 		View view = View.LOGIN;
+//		View view = View.MAIN;
 		while (true) {
 			switch (view) {
 			case LOGIN:
@@ -107,18 +117,18 @@ public class MainController extends Print {
 		System.out.println("예약취소");
 		//몇번 예약취소됬는지 표시
 		System.out.println("몇일날 예약취소 되었습니다.");
-		System.out.println("1 다시 예약취소 2 예약 3 등록된 환자");
+		System.out.println("1 다시 예약등록 2 예약취소 3 등록된 환자");
 		int sel = ScanUtil.menu();
 		switch (sel) {
 		case 1:
-			return View.SCHEDULE_CANCAL;
+			return View.SCHEDULE_INSERT;
 		case 2:
-			return View.SCHEDULE;
+			return View.SCHEDULE_CANCAL;
 		case 3:
 			return View.PATIENT_OLD;
 
 		default:
-			return View.PATIENT_OLD;
+			return View.SCHEDULE_CANCAL;
 		}
 	}
 
@@ -135,7 +145,7 @@ public class MainController extends Print {
 		case 3:
 			return View.PATIENT_OLD;
 		default:
-			return View.PAY_SEARCH;
+			return View.PAY_UPDATE;
 		}
 	}
 
@@ -174,6 +184,7 @@ public class MainController extends Print {
 	private View treatmentSearch() {
 		System.out.println("진료조회");
 		//등록된 내용 출력
+		System.out.println("등록된 내용 출력");
 		System.out.println("1진료수정 2 등록된환자");
 		int sel = ScanUtil.menu();
 		switch (sel) {
@@ -240,8 +251,31 @@ public class MainController extends Print {
 
 	private View treatmentInsert() {
 		System.out.println("진료등록");
+		//의사 번호 자동화하기 위해서 로그인에서 가져옴
+		freeVo dr =(freeVo)sessionStorage.get("Dr");
+		//진료등록 tr_no,tr_date 자동등록하게 하기
+		String remark = ScanUtil.nextLine("진료내용 등록");
+		String emp_no =(String)dr.getEmp_no();
+		String pt_no = (String)sessionStorage.get("pt_no");
+
+		List<Object> param = new ArrayList();
+		
+		param.add(remark);//진료내역
+		param.add(pt_no);//환자번호
+		//날짜는 오늘 날짜로 함
+		param.add(emp_no);//의사번호
+		
+		 patientservice.treatmentInsert(param);
+		
 		//등록된 내용 출력
-		System.out.println("등록된 내용출력");
+		System.out.println("진료등록 되었습니다.");
+		 Map<String, Object>list = patientservice.TIL(pt_no);
+		String no =(String)list.get("PT_NO");
+		String name =(String)list.get("PT_NAME");
+		String mark =(String)list.get("TR_REMARK");
+		String date =(String)list.get("TR_DATE");
+		System.out.println(no +"\t"+name +"\t"+mark+"\t"+date);
+		
 		System.out.println("1 진료수정 2 등록된환자 ");
 		int sel = ScanUtil.menu();
 		switch (sel) {
@@ -256,8 +290,12 @@ public class MainController extends Print {
 	}
 
 	private View patient_old() {
+		String ptNo = (String) sessionStorage.get("pt_no");
+		System.out.println(ptNo+"차트번호입니다.");//확인용
 		//해당 환자 정보 출력
-		System.out.println("1환자수정,2진료,3예약,4조회, 5홈");
+	    Map<String, Object>ptlist = patientservice.ptoList(ptNo);
+	    printpatient_old(ptlist);
+		System.out.println("1환자수정,2진료,3결제4예약,5조회, 6홈");
 		int sel = ScanUtil.menu();
 		switch (sel) {
 		case 1:
@@ -265,10 +303,12 @@ public class MainController extends Print {
 		case 2:
 			return View.TREATMENT;
 		case 3:
-			return View.SCHEDULE;
+			return View.PAY;
 		case 4:
-			return View.SEARCH;
+			return View.SCHEDULE;
 		case 5:
+			return View.SEARCH;
+		case 6:
 			return View.MAIN;
 		default:
 			return View.PATIENT_OLD;
@@ -298,7 +338,7 @@ public class MainController extends Print {
 
 	private View search() {
 		System.out.println("환자, 예약, 진료 조회");
-		System.out.println("1 환자,2, 진료, 3,예약");
+		System.out.println("1 환자,2, 진료, 3,예약4 결제 조회");
 		int sel = ScanUtil.menu();
 		switch (sel) {
 		case 1:
@@ -307,6 +347,8 @@ public class MainController extends Print {
 			return View.TREATMENT_SEARCH;
 		case 3:
 			return View.SCHEDULE_SEARCH;
+		case 4:
+			return View.PAY_SEARCH;
 
 		default:
 			return View.SEARCH;
@@ -350,17 +392,15 @@ public class MainController extends Print {
 
 	private View patientInsert() {
 		System.out.println("환자등록");
-//		if() {
-//			
-//		}
-		//등록하기 전에   주민등록 false true
-		//등록가능하면 등록 가능한 환자입니다. 
+		
+		//짝궁님 코드
+
 		return View.PATIENT_OLD;
 	}
 
 	private View treatment() {
 		System.out.println("진료");
-		System.out.println("1등록 2수정 3결제등록3홈");
+		System.out.println("1등록 2수정 3홈");
 		int sel = ScanUtil.menu();
 		switch (sel) {
 		case 1:
@@ -368,8 +408,6 @@ public class MainController extends Print {
 		case 2:
 			return View.TREATMENT_UPDATE;
 		case 3:
-			return View.PAY_INSERT;
-		case 4:
 			return View.MAIN;
 		default:
 			return View.TREATMENT;
@@ -378,15 +416,15 @@ public class MainController extends Print {
 
 	private View pay() {
 		System.out.println("결제목록");
-		System.out.println("1 결제조회,2 결제등록 3결제 수정");
+		System.out.println("1 결제등록,2 결제수정 3결제조회");
 		int sel = ScanUtil.menu();
 		switch (sel) {
 		case 1:
-			return View.PAY_SEARCH;
-		case 2:
 			return View.PAY_INSERT;
-		case 3:
+		case 2:
 			return View.PAY_UPDATE;
+		case 3:
+			return View.PAY_SEARCH;
 
 		default:
 			return View.PAY;
@@ -396,7 +434,7 @@ public class MainController extends Print {
 
 	private View schedule() {
 		System.out.println("예약");
-		System.out.println("1예약등록,2 예약수정,3예약조회,4예약취소 5홈");
+		System.out.println("1예약등록,2 예약수정,3예약취소 4홈");
 		int sel = ScanUtil.menu();
 		switch (sel) {
 		case 1:
@@ -404,10 +442,8 @@ public class MainController extends Print {
 		case 2:
 			return View.SCHEDULE_UPDATE;
 		case 3:
-			return View.SCHEDULE_SEARCH;
-		case 4:
 			return View.SCHEDULE_CANCAL;
-		case 5:
+		case 4:
 			return View.PATIENT_OLD;
 
 		default:
@@ -416,19 +452,53 @@ public class MainController extends Print {
 	}
 
 	private View patient() {
-		//어떤 환자인지 조회부터하는거 신환 구환 구분
-		//구환이면 map타입 이용해서 넣기
-		System.out.println("신환 등록된 환자 ");
-		if(true) { //신환이면 바로 환자등록으로 가기
+		//환자 이름 등록해서 출력 확인
+		String patientSearch = ScanUtil.nextLine("환자이름 입력하기");
+		List<Object> param = new ArrayList();
+		param.add(patientSearch);
+		List<Map<String, Object>> list = (List<Map<String, Object>>)patientservice.patientNOSearch(param);
+		
+		System.out.println(list);//출력확인용
+		
+		if(list == null) {
+			//환자 정보가 없으면(null)이면 환자등록메소드로 이동
+			System.out.println("등록된 정보가 없습니다. 환자등록으로 이동합니다.");
 			return View.PATIENT_INSERT;
-		}else {    // 구환이면 구환 홈으로 감
-			//map 타입사용
+			
+		}else {
+			//환자 정보가 있으면 patient_old 로 이동
+			String pt_no = ScanUtil.nextLine("차트번호 입력하시오");
+			//환자 차트 입력해서 sessionStorage에 담음
+			sessionStorage.put("pt_no",pt_no);
 			return View.PATIENT_OLD;
+			
 		}
+		
 	}
 
 	private View login() {
 		System.out.println("로그인 페이지");
+		//의사 아이디
+		// id , pass ,no-> map 타입 저장하고
+		// 진료 직원번호
+		String id = ScanUtil.nextLine("id입력");
+		String pass = ScanUtil.nextLine("pass입력");
+		
+		List<Object> param =new ArrayList();
+		param.add(id);
+		param.add(pass);
+		
+		
+		boolean login = freeservice.login(param);
+		if(!login) {//로그인 실패시
+			System.out.println("로그인실패했습니다.");
+			return View.LOGIN;
+		}else {//로그인 성공시
+			freeVo Dr_name = (freeVo)sessionStorage.get("Dr");
+			System.out.println(Dr_name.getEmp_name()+"님 환영합니다.");
+			
+		}
+		
 		return View.MAIN;
 	}
 
