@@ -320,13 +320,13 @@ public class patientDao {
 			return jdbc.selectList(sql,param,patientVo.class);
 		}
 
-		public List<Map<String, Object>> calendarsearch(List<Object> param) {
+		public List<patientVo> calendarsearch(List<Object> param) {
 	         String sql =" SELECT DISTINCT P.PT_NO, P.PT_NAME, P.PT_TELNO, S.SC_REMARK, S.SC_CK, T.EMP_NO\r\n" + 
 	                 " FROM PATIENT P, SCHEDULE S, TREATMENT T \r\n" + 
 	                 " WHERE S.PT_NO = P.PT_NO\r\n" + 
 	                 " AND TO_CHAR(SC_DATE, 'DD') = LPAD(?,2,0)";
 	           
-	           return jdbc.selectList(sql,param);
+	           return jdbc.selectList(sql,param,patientVo.class);
 		}
 	
 

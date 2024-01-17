@@ -35,8 +35,23 @@ public class Print {
 			String subNo = patientvo.getSub_no();
 			String empName = patientvo.getEmp_name();
 			System.out.println(trDate+trRemark+subNo+empName);
+			System.out.println("\t\t\t\t\t" + trDate + "\t" + trRemark + "\t" + subNo + "\t" + empName );
 		 }
 	 }
+	 public void printcalendarSearch(List<patientVo> list) {//출력문
+	      for (patientVo patientvo : list) {
+		    	 String ptNo = patientvo.getPt_no();
+		    	 String ptName = patientvo.getPt_name();
+		    	 String ptTelno = patientvo.getPt_telno();
+		    	 String scRemark = patientvo.getSc_remark();
+		    	 String scCk = patientvo.getSc_ck();
+		    	 String empNo = patientvo.getEmp_no();
+		    	 System.out.println();
+		         System.out.println("\t\t\t\t\t" + ptNo + "\t" + ptName + "\t" + ptTelno + "\t" + scRemark + "-" + scCk + "\t\t" + empNo + "\t\t");
+		         
+		      }
+			}
+	 
 	 public void printscheduleSearch(List<patientVo> list) {//출력문
 		 for (patientVo patientvo : list) {
 			String scDate = patientvo.getSc_date();
@@ -47,6 +62,7 @@ public class Print {
 			String subNo = patientvo.getSub_no();
 			String empName = patientvo.getEmp_name();
 			System.out.println(scDate + scRemark+subNo+empName+scCk+scCome+scCancal);
+			System.out.println("\t\t\t\t\t" + scDate + "\t" + scRemark + "\t" + subNo + "\t" + empName + "\t\t" + scCk + "\t\t" + scCome + "\t\t"+scCancal);
 			}
 	 }
 	 public void printvar() {

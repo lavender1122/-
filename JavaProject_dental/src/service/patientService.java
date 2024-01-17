@@ -113,7 +113,7 @@ public class patientService {
 		return patientdao.scSearchList(param, select);
 	}
 
-	public List<Map<String, Object>> calendarSearch(List<Object> param) {
+	public List<patientVo> calendarSearch(List<Object> param) {
 		 return patientdao.calendarsearch(param);
 	}
 	

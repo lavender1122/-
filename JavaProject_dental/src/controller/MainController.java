@@ -102,14 +102,14 @@ public class MainController extends Print {
 		      // 달력넣어서 조회하기
 		   System.out.println("날짜별 예약조회");
 		      printcalendar();
-		      System.out.println("- - - - - - - - - - - - - - - - - - -");
 		      String dateSearch = ScanUtil.nextLine("날짜 입력하기");
 		      List<Object> param = new ArrayList();
 		      param.add(dateSearch);
-		      List<Map<String, Object>> list =  patientservice.calendarSearch(param);
-		   
-		      System.out.println(list);
-		   
+		      List<patientVo> list =  patientservice.calendarSearch(param);
+		      printcalendarSearch(list);
+		    
+		      System.out.println("1.예약하기");
+		      System.out.println("2.다");
 		      return View.SCHEDULE;
 		   }
 
@@ -630,11 +630,23 @@ public class MainController extends Print {
 			return View.PATIENT_INSERT;
 			
 		}else {
-			//환자 정보가 있으면 patient_old 로 이동
-			String pt_no = ScanUtil.nextLine("차트번호 입력하시오");
-			//환자 차트 입력해서 sessionStorage에 담음
-			sessionStorage.put("pt_no",pt_no);
-			return View.PATIENT_OLD;
+			System.out.println("1. 등록된 환자");
+			System.out.println("2. 신규 환자");
+			int sel = ScanUtil.menu();
+			switch (sel) {
+			case 1:
+				//환자 정보가 있으면 patient_old 로 이동
+				String pt_no = ScanUtil.nextLine("차트번호 입력하시오");
+				//환자 차트 입력해서 sessionStorage에 담음
+				sessionStorage.put("pt_no",pt_no);
+				return View.PATIENT_OLD;
+			case 2:
+				//환자정보가 없으면 환자등록
+				return View.PATIENT_INSERT;
+
+			default:
+				return View.PATIENT;
+			}
 			
 		}
 		
