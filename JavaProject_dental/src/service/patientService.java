@@ -45,8 +45,8 @@ public class patientService {
 	}
 
 	
-	public void TU(List<Object> param, int select) {
-		patientdao.TU(param,select);
+	public void TU(List<Object> param) {
+		patientdao.TU(param);
 	}
 
 	public Map<String, Object> TUL() {
@@ -56,9 +56,66 @@ public class patientService {
 		patientdao.patientInsert(param);
 	   }
 
-	public void PIL() {
-		patientdao.PIL();
+	public Map<String, Object> PIL() {
+		
+		return patientdao.PIL();
 	}
 
+	public void SI(List<Object> param) {
+		patientdao.SI(param);
+	}
+
+	public Map<String, Object> SIL(String ptNo) {
+		return patientdao.SIL(ptNo);
+	}
+
+	public Object SU(List<Object> param, int select) {
+		return patientdao.SU(param,select);
+	}
+
+	public Map<String, Object> SUL(String ptNo) {
+		return patientdao.SUL(ptNo);
+	}
+
+	public void patientUpdate(List<Object> param, int sel) {
+	      patientdao.patientupdate(param,sel);
+	   }
+
+	public Map<String, Object> SC(String ptNo) {
+		
+		return patientdao.SC(ptNo);
+	}
+
+	public List<Map<String, Object>> SCL(String ptNo) {
+		return patientdao.SCL(ptNo);
+	}
+
+	public void scCancel(List<Object> param) {
+		patientdao.scCancel(param);
+	}
+
+	
+
+	public Map<String, Object> scCancalCk(List<Object> param) {
+		return patientdao.scCancalCk(param);
+	}
+	   public List<Map<String, Object>> dateSearch() {
+		      return patientdao.dateSearch();
+		   }
+
+
+
+	public List<patientVo> trSearchList(List<Object> param, int select) {
+		return patientdao.trSearchList(param,select);
+	}
+
+	public List<patientVo> scSearchList(List<Object> param, int select) {
+		return patientdao.scSearchList(param, select);
+	}
+
+	public List<Map<String, Object>> calendarSearch(List<Object> param) {
+		 return patientdao.calendarsearch(param);
+	}
+	
 	
 }

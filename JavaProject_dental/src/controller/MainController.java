@@ -40,11 +40,11 @@ public class MainController extends Print {
 			case MAIN:
 				view = home();
 				break;
-			case ADMIN:
-				view = admin();
-				break;
 			case DATE_SEARCH:
 				view = dateSearch();
+				break;
+			case CALENDAR_SEARCH:
+				view = calendarSearch();
 				break;
 			case PATIENT:
 				view = patient();
@@ -59,7 +59,7 @@ public class MainController extends Print {
 				view = patientUpdate();
 				break;
 			case PATIENT_SEARCH:
-				view = patientSearch();
+				view = scheduleSearch();
 				break;
 			case SCHEDULE:
 				view = schedule();
@@ -75,18 +75,6 @@ public class MainController extends Print {
 				break;
 			case SCHEDULE_CANCAL:
 				view = scheduleCancal();
-				break;
-			case PAY:
-				view = pay();
-				break;
-			case PAY_SEARCH:
-				view = paySearch();
-				break;
-			case PAY_INSERT:
-				view = payInsert();
-				break;
-			case PAY_UPDATE:
-				view = payUpdate();
 				break;
 			case TREATMENT:
 				view = treatment();
@@ -109,16 +97,78 @@ public class MainController extends Print {
 			}
 		}
 	}
+	   private View calendarSearch() {
+		      // 원하는 날짜 넣어서 조회하기
+		      // 달력넣어서 조회하기
+		   System.out.println("날짜별 예약조회");
+		      printcalendar();
+		      System.out.println("- - - - - - - - - - - - - - - - - - -");
+		      String dateSearch = ScanUtil.nextLine("날짜 입력하기");
+		      List<Object> param = new ArrayList();
+		      param.add(dateSearch);
+		      List<Map<String, Object>> list =  patientservice.calendarSearch(param);
+		   
+		      System.out.println(list);
+		   
+		      return View.SCHEDULE;
+		   }
 
 	private View dateSearch() {
-		System.out.println("날짜조회");
-		return View.MAIN;
-	}
+	      System.out.println("당일예약조회");
+	      printvar();
+	      List<Map<String, Object>> list = patientservice.dateSearch();
+	      System.out.println("회원번호 \t\t환자이름\t\t예약내용\t\t담당의\t\t전신질환\t\t특이사항\t\t" );
+	      String date = "";
+	      
+	      for (Map<String, Object> map : list) {
+	         
+	         String no = (String) map.get("PT_NO");
+	         String name = (String) map.get("PT_NAME");
+	         String remark = (String) map.get("SC_REMARK");
+	         String disease = (String) map.get("PT_DISEASE");
+	         String str = (String)map.get("PT_STR"); 
+	         String drno = (String) map.get("EMP_NO");
+	         String ck = (String) map.get("SC_CK");
+	          date = (String) map.get("SC_DATE");
+	         
+	         
+	      
+	      System.out.println   
+	      (no + "\t\t"  + name + "\t\t" + remark +"\t\t"  + 
+	      drno + "\t\t" + disease + "\t\t" + str + "\t\t"  );
+	      }
+	      System.out.println("\n오늘은\t" + date + "입니다.");
+	         printvar()   ;
+	      return View.MAIN;
+	   }
 
 	private View scheduleCancal() {
-		System.out.println("예약취소");
+		//해당하는 환자예약리스트 출력 /
+		String ptNo =(String)sessionStorage.get("pt_no");
+		
+		Map<String, Object>map =patientservice.SC(ptNo); //환자번호,이름,전화번호,특이사항, 예약취소 표시
+		
+		System.out.println(map);
+		
+		List<Map<String, Object>> list =patientservice.SCL(ptNo); 
+		System.out.println(list);
+		
+		List<Object> param = new ArrayList();
+		
+		String scContent = ScanUtil.nextLine("예약취소한 이유적으시오");
+		param.add(scContent);
+		param.add(ptNo);
+		String scNo = ScanUtil.nextLine("예약취소할 예약번호를 입력하세요");
+		param.add(scNo);
+		
+		patientservice.scCancel(param);
+		
+		
 		//몇번 예약취소됬는지 표시
-		System.out.println("몇일날 예약취소 되었습니다.");
+		Map<String, Object>ck = patientservice.scCancalCk(param);
+		System.out.println(ck);
+		
+		System.out.println("예약취소 되었습니다.");
 		System.out.println("1 다시 예약등록 2 예약취소 3 등록된 환자");
 		int sel = ScanUtil.menu();
 		switch (sel) {
@@ -127,72 +177,59 @@ public class MainController extends Print {
 		case 2:
 			return View.SCHEDULE_CANCAL;
 		case 3:
-			return View.PATIENT_OLD;
 
 		default:
 			return View.SCHEDULE_CANCAL;
 		}
 	}
 
-	private View payUpdate() {
-		System.out.println("결제수정");
-		System.out.println("결제 수정된 내용 출력");
-		System.out.println("1.다시결제수정 2 결제 3 등록된 환자");
-		int sel = ScanUtil.menu();
-		switch (sel) {
-		case 1:
-			return View.PAY_UPDATE;			
-		case 2:
-			return View.PAY;
-		case 3:
-			return View.PATIENT_OLD;
-		default:
-			return View.PAY_UPDATE;
-		}
-	}
 
-	private View payInsert() {
-		System.out.println("결제등록");
-		System.out.println("결제등록한 내용 출력");
-		System.out.println("1다시 결제 수정 2.등록한환자");
-		int sel = ScanUtil.menu();
-		switch (sel) {
-		case 1:
-			return View.PAY_UPDATE;
-		case 2:
-			return View.PATIENT_OLD;
 
-		default:
-			return View.PAY_INSERT;
-		}
-	}
-
-	private View paySearch() {
-		System.out.println("결제조회");
-		System.out.println("1 결제수정 2구환");
-		int sel = ScanUtil.menu();
-		switch (sel) {
-		case 1:
-			return View.PAY_UPDATE;
-		case 2:
-			return View.PATIENT_OLD;
-
-		default:
-			return View.PAY_SEARCH;
-		}
-		
-	}
 
 	private View treatmentSearch() {
 		System.out.println("진료조회");
-		//등록된 내용 출력
-		System.out.println("등록된 내용 출력");
-		System.out.println("1진료수정 2 등록된환자");
+		String ptNo = (String) sessionStorage.get("pt_no");
+		String ptName = (String) sessionStorage.get("ptName");
+		System.out.println("진료번호 \t 환자이름");
+		System.out.println(ptNo +"\t"+ptName);
+		List<Object> param = new ArrayList();
+		
+		param.add(ptNo);//첫번째값 환자번호
+		System.out.println("1날짜 검색 2 내용검색 3과검색 ");
+		int select = ScanUtil.menu();//번호 입력
+		if(select==1) {
+			System.out.println("날짜 검색");
+			String mon = ScanUtil.nextLine("월 입력하시오");
+			param.add(mon);//두번째값 월
+			String strDay = ScanUtil.nextLine("시작일 입력하시오");
+			param.add(strDay);//세번째값 월
+			String endDay = ScanUtil.nextLine("마지막 입력하시오");
+			param.add(endDay);//네번째값 월
+			
+		}
+		if(select==2) {
+			System.out.println("내용 검색");
+			String content = ScanUtil.nextLine("찾고 싶은내용 검색하시오");
+			param.add(content);//두번째
+		}
+		if(select==3) {
+			System.out.println("과검색");
+			String sub = ScanUtil.nextLine("찾고 과 검색하시오");
+			param.add(sub);//두번째
+		}
+		
+		List<patientVo> list = patientservice.trSearchList(param,select);
+		
+		printtrSearchList(list);
+			
+		System.out.println("1진료조회 2 예약조회 3 등록된환자");
 		int sel = ScanUtil.menu();
 		switch (sel) {
 		case 1:
-			return View.TREATMENT_UPDATE;
+			return View.TREATMENT_SEARCH;
 		case 2:
+			return View.SCHEDULE_SEARCH;
+		case 3:
 			return View.PATIENT_OLD;
 
 		default:
@@ -200,30 +237,90 @@ public class MainController extends Print {
 		}
 	}
 
-	private View patientSearch() {
-		System.out.println("환자조회");
-		System.out.println("1 환자수정, 2구환");
-		int sel = ScanUtil.menu();
-		switch (sel) {
-		case 1:
-			return View.PATIENT_UPDATE;
-		case 2:
-			return View.PATIENT_OLD;
-
-		default:
-			return View.PATIENT_SEARCH;
-		}
-	}
 
 	private View scheduleSearch() {
 		System.out.println("예약조회");
-		return View.PATIENT_OLD;
+		String ptNo = (String) sessionStorage.get("pt_no");
+		String ptName = (String) sessionStorage.get("ptName");
+		System.out.println("진료번호 \t 환자이름");
+		System.out.println(ptNo +"\t"+ptName);
+		List<Object> param = new ArrayList();
+		
+		param.add(ptNo);//첫번째값 환자번호
+		System.out.println("1날짜 검색 2 내용검색 3과검색 ");
+		int select = ScanUtil.menu();//번호 입력
+		if(select==1) {
+			System.out.println("날짜 검색");
+			String mon = ScanUtil.nextLine("월 입력하시오");
+			param.add(mon);//두번째값 월
+			String strDay = ScanUtil.nextLine("시작일 입력하시오");
+			param.add(strDay);//세번째값 일
+			String endDay = ScanUtil.nextLine("마지막 입력하시오");
+			param.add(endDay);//네번째값 일
+			
+		}
+		if(select==2) {
+			System.out.println("내용 검색");
+			String content = ScanUtil.nextLine("찾고 싶은내용 검색하시오");
+			param.add(content);//두번째
+		}
+		if(select==3) {
+			System.out.println("과검색");
+			String sub = ScanUtil.nextLine("찾고 과 검색하시오");
+			param.add(sub);//두번째
+		}
+		
+		List<patientVo> list = patientservice.scSearchList(param,select);
+		printscheduleSearch(list);
+		
+		System.out.println("1진료조회 2 예약조회 3 등록된환자");
+		int sel = ScanUtil.menu();
+		switch (sel) {
+		case 1:
+			return View.TREATMENT_SEARCH;
+		case 2:
+			return View.SCHEDULE_SEARCH;
+		case 3:
+			return View.PATIENT_OLD;
+
+		default:
+			return View.TREATMENT_SEARCH;
+		}
 	}
 
 	private View scheduleUpdate() {
-		System.out.println("예약수정");
+		System.out.println("예약수정 페이지");
+		//SC_REMARK 쓰기
+		//SC_REGDATE로 수정
+		//SUB_NO :session 이용
+		//pt_no : session
+		System.out.println("예약수정할 번호 고르시오");
+		System.out.println("1.예약내용 변경");
+		System.out.println("2.예약일자 변경");
+		System.out.println("3.예약일자, 내용 변경");
+		int select = ScanUtil.menu();
+		List<Object> param  = new ArrayList(); 
+		if(select == 1 || select == 3) {
+			String scRemark = ScanUtil.nextLine("예약변경내용 적으세요");
+			param.add(scRemark);
+		}
+		if(select == 2 || select == 3) {
+			String scRegDate = ScanUtil.nextLine("예약날짜 시간적으세요");
+			param.add(scRegDate);
+		
+		}
+		String ptNo = (String)sessionStorage.get("pt_no");
+			param.add(ptNo);
+			
+			patientservice.SU(param,select);
+			//수정된 내용 출력
+			Map<String, Object> list = patientservice.SUL(ptNo);
+			String scRemark = (String) list.get("SC_REMARK");
+			Date scRegDate = (Date) list.get("SC_DATE");
+			System.out.println(ptNo+scRemark+scRegDate);
+			
+			
 		System.out.println("1다시 예약수정 2등록된환자");
-		//수정된 내용 출력
 		int sel = ScanUtil.menu();
 		switch (sel) {
 		case 1:
@@ -236,39 +333,19 @@ public class MainController extends Print {
 	}
 
 	private View treatmentUpdate() {
-		System.out.println("진료수정");
-		//수정하기 진료내용,진료일, 둘다
-		System.out.println("1 진료내용");
-		System.out.println("2 진료일");
-		System.out.println("3 진료내용 진료일");
-		
-		int select = ScanUtil.nextInt("선택하시오");
+		System.out.println("진료수정 페이지입니다.");
 		List<Object>param = new ArrayList();
-		if(select == 1 || select ==3 ) {
-			String content = ScanUtil.nextLine("1.진료내용 변경");
+			String content = ScanUtil.nextLine("진료내용 변경 쓰시오");
 			param.add(content);
-		}
-		if(select == 2 || select ==3 ) {
-			String date = ScanUtil.nextLine("2.진료일 변경");
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			Date date2=null;
-			try {
-				date2=sdf.parse(date);
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-			param.add(date2);
-		}
-		patientservice.TU(param,select);
+			
+		patientservice.TU(param);
 		
 		System.out.println("수정된내용 출력");
-		 Map<String, Object>list = patientservice.TUL();
-			String no =(String)list.get("PT_NO");
-			String name =(String)list.get("PT_NAME");
-			String mark =(String)list.get("TR_REMARK");
-			String date =(String)list.get("TR_DATE");
-			System.out.println(no +"\t"+name +"\t"+mark+"\t"+date);
 		
+		 Map<String, Object> list = patientservice.TUL();
+		 System.out.println(list);
+		 System.out.println("수정된 내용 출력 완료됬습니다.");
+		 
 		//수정된 리스트  출력
 		System.out.println("1다시 진료수정   2등록된환자");
 		int sel = ScanUtil.nextInt("선택");
@@ -303,12 +380,7 @@ public class MainController extends Print {
 		//등록된 내용 출력
 		System.out.println("진료등록 되었습니다.");
 		 Map<String, Object>list = patientservice.TIL(pt_no);
-		String no =(String)list.get("PT_NO");
-		String name =(String)list.get("PT_NAME");
-		String mark =(String)list.get("TR_REMARK");
-		String date =(String)list.get("TR_DATE");
-		System.out.println(no +"\t"+name +"\t"+mark+"\t"+date);
-		
+		System.out.println(list);
 		System.out.println("1 진료수정 2 등록된환자 ");
 		int sel = ScanUtil.menu();
 		switch (sel) {
@@ -323,13 +395,16 @@ public class MainController extends Print {
 	}
 
 	private View patient_old() {
+		
 		String ptNo = (String) sessionStorage.get("pt_no");
 		System.out.println(ptNo+"차트번호입니다.");//확인용
 		//해당 환자 정보 출력
 	    Map<String, Object>ptlist = patientservice.ptoList(ptNo);
-	    printpatient_old(ptlist);
 	    
-		System.out.println("1환자수정,2진료,3결제4예약,5조회, 6홈");
+	    printpatient_old(ptlist); //print 메소드에서 환자이름 넣음
+
+	    
+		System.out.println("1환자수정,2진료,3예약,4조회, 5홈");
 		int sel = ScanUtil.menu();
 		switch (sel) {
 		case 1:
@@ -337,52 +412,26 @@ public class MainController extends Print {
 		case 2:
 			return View.TREATMENT;
 		case 3:
-			return View.PAY;
-		case 4:
 			return View.SCHEDULE;
-		case 5:
+		case 4:
 			return View.SEARCH;
-		case 6:
+		case 5:
 			return View.MAIN;
 		default:
 			return View.PATIENT_OLD;
 		}
 	}
 
-	private View admin() {
-		System.out.println("품목 , 진료과,직원 조회");
-		System.out.println("1 품목조회 2직원조회 3의사조회 4진료과조회 5홈");
-		int sel = ScanUtil.menu();
-		switch (sel) {
-		case 1:
-			return View.ITEM;
-		case 2:
-			return View.EMPLOYEE;
-		case 3:
-			return View.DOCTOR;
-		case 4:
-			return View.SUBJECT;
-		case 5:
-			return View.MAIN;
-
-		default:
-			return View.ADMIN;
-		}
-	}
-
 	private View search() {
 		System.out.println("환자, 예약, 진료 조회");
-		System.out.println("1 환자,2, 진료, 3,예약4 결제 조회");
+		System.out.println("1, 진료, 2,예약");
 		int sel = ScanUtil.menu();
 		switch (sel) {
 		case 1:
-			return View.PATIENT_SEARCH;
-		case 2:
 			return View.TREATMENT_SEARCH;
-		case 3:
+		case 2:
 			return View.SCHEDULE_SEARCH;
-		case 4:
-			return View.PAY_SEARCH;
+		
 
 		default:
 			return View.SEARCH;
@@ -391,6 +440,34 @@ public class MainController extends Print {
 
 	private View scheduleInsert() {
 		System.out.println("예약등록");
+		//예약번호 -> sql에서
+		//sc_remark 작성해서 보내기
+		//sc date 여기서 등록
+		//sub_no session("dr") 이용
+		//pt_no session("pt_no") 이용
+		freeVo dr = (freeVo)sessionStorage.get("Dr");
+		String scRemark = ScanUtil.nextLine("예약내용 적으세요");
+		String scDate = ScanUtil.nextLine("예약일 적으세요");
+		String subNo = dr.getSub_no();
+		String ptNo =(String)sessionStorage.get("pt_no");
+		System.out.println("출력확인");
+		System.out.println(subNo);
+		System.out.println(ptNo);
+		System.out.println("------------");
+		
+		List<Object> param = new ArrayList();
+		param.add(scRemark);
+		param.add(scDate);
+		param.add(subNo);
+		param.add(ptNo);
+		
+		patientservice.SI(param);
+		
+		System.out.println("등록완료");
+		Map<String, Object>list = patientservice.SIL(ptNo);
+		System.out.println(list);
+		
+		System.out.println("예약등록 완료되었습니다.");
 		System.out.println("예약등록한 내용출력");
 		System.out.println("1예약수정 2예약취소 3구환");
 		int sel =ScanUtil.menu();
@@ -409,11 +486,53 @@ public class MainController extends Print {
 
 	private View patientUpdate() {
 		System.out.println("환자수정");
+		String patientno = (String) sessionStorage.get("pt_no");
+	      System.out.println("환자수정");
+	      System.out.println("1. 이름");
+	      System.out.println("2. 주소");
+	      System.out.println("3. 전화번호");
+	      System.out.println("4. 특이사항");
+	      System.out.println("5. 전신질환");
+	      System.out.println("6. 이전페이지");
+	      System.out.println("7. 등록된환자");
+
+	      int sel = ScanUtil.menu();
+	      if (sel == 6) {
+	         return View.PATIENT_UPDATE;
+	      }
+	      if (sel == 7) {
+	    	  return View.PATIENT_OLD;
+	      }
+	      List<Object> param = new ArrayList();
+	      if (sel == 1) {
+	         String name = ScanUtil.nextLine("이름변경 : ");
+	         param.add(name);
+	      }
+	      if (sel == 2) {
+	         String address = ScanUtil.nextLine("주소변경 : ");
+	         param.add(address);
+	      }
+	      if (sel == 3) {
+	         String telno = ScanUtil.nextLine("전화번호변경 : ");
+	         param.add(telno);
+	      }
+	      if (sel == 4) {
+	         String str = ScanUtil.nextLine("특이사항 : ");
+	         param.add(str);
+	      }
+	      if (sel == 5) {
+	         String disease = ScanUtil.nextLine("전신질환 : ");
+	         param.add(disease);
+	      }
+	      param.add(patientno);
+	      patientservice.patientUpdate(param, sel);
+	      System.out.println("정보가 변경되었습니다.");
+
 		//이름 주소 전화번호, 전신질환
 		System.out.println("환자수정 리스트 출력");
 		System.out.println("1 다시 환자수정 2 등록된환자");
-		int sel = ScanUtil.menu();
-		switch (sel) {
+		int select = ScanUtil.menu();
+		switch (select) {
 		case 1:
 			return View.PATIENT_UPDATE;
 		case 2:
@@ -448,9 +567,14 @@ public class MainController extends Print {
 	      param.add(disease);
 	      
 	      patientservice.patientInsert(param);
+	      System.out.println("등록 완료되었습니다.");
 	      
-	      patientservice.PIL();
-	
+	      Map<String, Object>map =patientservice.PIL();
+	      String ptNo = (String) map.get("PT_NO");
+	      String ptName = (String) map.get("ptName");
+	      sessionStorage.put("pt_no", ptNo);
+	      sessionStorage.put("ptName", ptName);
+	     System.out.println(ptNo);
 
 		return View.PATIENT_OLD;
 	}
@@ -471,23 +595,6 @@ public class MainController extends Print {
 		}
 	}
 
-	private View pay() {
-		System.out.println("결제목록");
-		System.out.println("1 결제등록,2 결제수정 3결제조회");
-		int sel = ScanUtil.menu();
-		switch (sel) {
-		case 1:
-			return View.PAY_INSERT;
-		case 2:
-			return View.PAY_UPDATE;
-		case 3:
-			return View.PAY_SEARCH;
-
-		default:
-			return View.PAY;
-		}
-		
-	}
 
 	private View schedule() {
 		System.out.println("예약");
@@ -538,8 +645,9 @@ public class MainController extends Print {
 		//의사 아이디
 		// id , pass ,no-> map 타입 저장하고
 		// 진료 직원번호
-		String id = ScanUtil.nextLine("id입력");
-		String pass = ScanUtil.nextLine("pass입력");
+		String id = "DA1";//ScanUtil.nextLine("id입력");
+		String pass = "1234";//ScanUtil.nextLine("pass입력");
+		
 		
 		List<Object> param =new ArrayList();
 		param.add(id);
@@ -561,7 +669,7 @@ public class MainController extends Print {
 
 	private View home() {
 		//출력문
-		System.out.println("환자, 날짜조회, 관리자");
+		System.out.println("1환자, 2당일날짜조회,3원하는 날짜 조회");
 		//선택문
 		int sel = ScanUtil.nextInt("선택 하시오 ");
 		switch (sel) {
@@ -569,8 +677,8 @@ public class MainController extends Print {
 			return View.PATIENT;
 		case 2:
 			return View.DATE_SEARCH;
-		case 3: 
-			return View.ADMIN;
+		case 3:
+			return View.CALENDAR_SEARCH;
 		default:
 			return View.MAIN;
 		}
