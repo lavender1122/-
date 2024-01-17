@@ -622,7 +622,20 @@ public class MainController extends Print {
 		param.add(patientSearch);
 		List<Map<String, Object>> list = (List<Map<String, Object>>)patientservice.patientNOSearch(param);
 		
-		System.out.println(list);//출력확인용
+		   for (Map<String, Object> map : list) {
+		         String no = (String) map.get("PT_NO");
+		         String name = (String) map.get("PT_NAME");
+		         String address = (String) map.get("PT_ADDRESS");
+		         String rrn1 = (String) map.get("PT_RRN1");
+		         String rrn2 = (String) map.get("PT_RRN2");
+		         String telno = (String) map.get("PT_TELNO");
+		         String str = (String) map.get("PT_STR");
+		         String disease = (String) map.get("PT_DISEASE");
+
+		         System.out.println(no + "\t\t" + name + "\t\t" + telno + "\t\t" + rrn1 + "-" + rrn2 + "\t\t" + address
+		               + "\t\t" + str + "\t\t");
+
+		      }
 		
 		if(list == null) {
 			//환자 정보가 없으면(null)이면 환자등록메소드로 이동
@@ -636,10 +649,12 @@ public class MainController extends Print {
 			switch (sel) {
 			case 1:
 				//환자 정보가 있으면 patient_old 로 이동
+				
 				String pt_no = ScanUtil.nextLine("차트번호 입력하시오");
-				//환자 차트 입력해서 sessionStorage에 담음
-				sessionStorage.put("pt_no",pt_no);
-				return View.PATIENT_OLD;
+					//환자 차트 입력해서 sessionStorage에 담음
+					sessionStorage.put("pt_no",pt_no);
+					return View.PATIENT_OLD;
+				
 			case 2:
 				//환자정보가 없으면 환자등록
 				return View.PATIENT_INSERT;
