@@ -116,27 +116,24 @@ public class MainController extends Print {
 	private View dateSearch() {
 	      System.out.println("당일예약조회");
 	      printvar();
-	      List<Map<String, Object>> list = patientservice.dateSearch();
-	      System.out.println("회원번호 \t\t환자이름\t\t예약내용\t\t담당의\t\t전신질환\t\t특이사항\t\t" );
+	      List<patientVo> list = patientservice.dateSearch();
+	      System.out.println("환자번호 \t\t환자이름\t\t예약내용\t\t진료과\t\t전날확인\t\t전화번호" );
 	      String date = "";
 	      
-	      for (Map<String, Object> map : list) {
-	         
-	         String no = (String) map.get("PT_NO");
-	         String name = (String) map.get("PT_NAME");
-	         String remark = (String) map.get("SC_REMARK");
-	         String disease = (String) map.get("PT_DISEASE");
-	         String str = (String)map.get("PT_STR"); 
-	         String drno = (String) map.get("EMP_NO");
-	         String ck = (String) map.get("SC_CK");
-	          date = (String) map.get("SC_DATE");
-	         
-	         
-	      
+	      for (patientVo patientvo : list) {
+	    	  String no = patientvo.getPt_no(); 
+	    	  String name = patientvo.getPt_name();
+	    	  String remark =patientvo.getSc_remark();
+	    	  String telno =patientvo.getPt_telno();
+	    	  String subNo = patientvo.getSub_no();
+	    	  String ck = patientvo.getSc_ck();
+	    	  date = patientvo.getSc_date();
+		
 	      System.out.println   
 	      (no + "\t\t"  + name + "\t\t" + remark +"\t\t"  + 
-	      drno + "\t\t" + disease + "\t\t" + str + "\t\t"  );
+	      subNo + "\t\t" + ck + "\t\t" + telno + "\t\t"  );
 	      }
+	      
 	      System.out.println("\n오늘은\t" + date + "입니다.");
 	         printvar()   ;
 	      return View.MAIN;
@@ -621,7 +618,12 @@ public class MainController extends Print {
 		List<Object> param = new ArrayList();
 		param.add(patientSearch);
 		List<Map<String, Object>> list = (List<Map<String, Object>>)patientservice.patientNOSearch(param);
-		
+		if(list == null) {
+			//환자 정보가 없으면(null)이면 환자등록메소드로 이동
+			System.out.println("등록된 정보가 없습니다. 환자등록으로 이동합니다.");
+			return View.PATIENT_INSERT;
+			
+		}
 		   for (Map<String, Object> map : list) {
 		         String no = (String) map.get("PT_NO");
 		         String name = (String) map.get("PT_NAME");
@@ -636,13 +638,6 @@ public class MainController extends Print {
 		               + "\t\t" + str + "\t\t");
 
 		      }
-		
-		if(list == null) {
-			//환자 정보가 없으면(null)이면 환자등록메소드로 이동
-			System.out.println("등록된 정보가 없습니다. 환자등록으로 이동합니다.");
-			return View.PATIENT_INSERT;
-			
-		}else {
 			System.out.println("1. 등록된 환자");
 			System.out.println("2. 신규 환자");
 			int sel = ScanUtil.menu();
@@ -661,7 +656,7 @@ public class MainController extends Print {
 
 			default:
 				return View.PATIENT;
-			}
+			
 			
 		}
 		
@@ -672,8 +667,8 @@ public class MainController extends Print {
 		//의사 아이디
 		// id , pass ,no-> map 타입 저장하고
 		// 진료 직원번호
-		String id = "DA1";//ScanUtil.nextLine("id입력");
-		String pass = "1234";//ScanUtil.nextLine("pass입력");
+		String id = ScanUtil.nextLine("id입력");
+		String pass =ScanUtil.nextLine("pass입력");
 		
 		
 		List<Object> param =new ArrayList();

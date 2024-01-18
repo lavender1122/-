@@ -42,7 +42,7 @@ public class patientDao {
 		public  void treatmentInsert(List<Object> param) {
 			String sql="    INSERT INTO TREATMENT\r\n" + 
 					"    VALUES(\r\n" + 
-					"    (SELECT 'T'||LPAD(MAX(TO_NUMBER(SUBSTR(TR_NO,2)))+1,3,'0')FROM TREATMENT),\r\n" + 
+					"    (SELECT 't'||LPAD(MAX(TO_NUMBER(SUBSTR(TR_NO,2)))+1,3,'0')FROM TREATMENT),\r\n" + 
 					"    ?,\r\n" + 
 					"    SYSDATE,\r\n" + 
 					"    ?,\r\n" + 
@@ -87,7 +87,7 @@ public class patientDao {
 
 		public void patientInsert(List<Object> param) {
 			String sql = "INSERT INTO PATIENT\r\n" + 
-					"  VALUES((SELECT 'P'||LPAD(MAX(TO_NUMBER(SUBSTR(PT_NO,2)))+1,3,'0') \r\n" + 
+					"  VALUES((SELECT 'p'||LPAD(MAX(TO_NUMBER(SUBSTR(PT_NO,2)))+1,3,'0') \r\n" + 
 					"                FROM PATIENT),\r\n" + 
 					"                ?,\r\n" + 
 					"                ? ,\r\n" + 
@@ -114,7 +114,7 @@ public class patientDao {
 		public void SI(List<Object> param) {
 			String sql = "INSERT INTO SCHEDULE\r\n" + 
 					"    VALUES(\r\n" + 
-					"    (SELECT 'S'||LPAD(MAX(TO_NUMBER(SUBSTR(SC_NO,2)))+1,3,'0')FROM SCHEDULE),\r\n" + 
+					"    (SELECT 's'||LPAD(MAX(TO_NUMBER(SUBSTR(SC_NO,2)))+1,3,'0')FROM SCHEDULE),\r\n" + 
 					"    ?,\r\n" + 
 					"     to_date(?,'MM-DD HH24:MI'),\r\n" + 
 					"    null,\r\n" + 
@@ -247,13 +247,19 @@ public class patientDao {
 					" AND E.EMP_NO LIKE 'D%'";
 			return jdbc.selectOne(sql);
 		}
-		   public List<Map<String, Object>> dateSearch() {
-			   String sql = " SELECT DISTINCT P.PT_NO, P.PT_NAME, S.SC_CK , P.PT_DISEASE, \r\n" + 
-		               " S.SC_REMARK,P.PT_STR , TO_CHAR(S.SC_DATE, 'YY/MM/DD') SC_DATE, T.EMP_NO \r\n" + 
-		               " FROM SCHEDULE S, PATIENT P, TREATMENT T\r\n" + 
-		               " WHERE S.PT_NO = P.PT_NO \r\n" + 
-		               " AND SC_DATE = TO_CHAR(SYSDATE)";
-		         return jdbc.selectList(sql);
+		   public List<patientVo> dateSearch() {
+			   String sql = "SELECT DISTINCT \r\n" + 
+			   		" P.PT_NO, \r\n" + 
+			   		" P.PT_NAME, \r\n" + 
+			   		" P.PT_TELNO,\r\n" + 
+			   		" S.SC_REMARK, \r\n" + 
+			   		" to_char(S.SC_DATE) SC_DATE,\r\n" + 
+			   		" S.SC_CK,\r\n" + 
+			   		" S.SUB_NO \r\n" + 
+			   		" FROM SCHEDULE S, PATIENT P\r\n" + 
+			   		" WHERE S.PT_NO = P.PT_NO AND TO_CHAR(S.SC_DATE, 'YY/MM/DD') = TO_CHAR(SYSDATE, 'YY/MM/DD') \r\n" + 
+			   		" order by SC_DATE";
+		         return jdbc.selectList(sql,patientVo.class);
 		      }
 
 		

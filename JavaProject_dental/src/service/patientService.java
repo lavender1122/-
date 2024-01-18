@@ -99,7 +99,7 @@ public class patientService {
 	public Map<String, Object> scCancalCk(List<Object> param) {
 		return patientdao.scCancalCk(param);
 	}
-	   public List<Map<String, Object>> dateSearch() {
+	   public List<patientVo> dateSearch() {
 		      return patientdao.dateSearch();
 		   }
 

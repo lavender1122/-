@@ -29,6 +29,9 @@ public class Print {
 			System.out.println(no +"\t"+name +"\t"+gen +"\t"+ rrn1 +"\t"+rrn2 +"\t"+ str+"\t"+dis);
 	 }
 	 public void printtrSearchList(List<patientVo> list) {//출력문
+		 if(list == null) {
+				System.out.println("조회내역 없습니다.");
+			}else {
 		 for (patientVo patientvo : list) {
 		 String trDate = patientvo.getTr_date();
 			String trRemark = patientvo.getTr_remark();
@@ -36,6 +39,7 @@ public class Print {
 			String empName = patientvo.getEmp_name();
 			System.out.println(trDate+trRemark+subNo+empName);
 			System.out.println("\t\t\t\t\t" + trDate + "\t" + trRemark + "\t" + subNo + "\t" + empName );
+		 }
 		 }
 	 }
 	 public void printcalendarSearch(List<patientVo> list) {//출력문
